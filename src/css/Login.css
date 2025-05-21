@@ -1,0 +1,224 @@
+/* Container tổng thể */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #f0f4f8, #d9e6f2); /* Gradient nền */
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  /* Logo */
+  .logo {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .logo img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .logo h1 {
+    color: #34a853; /* Màu xanh */
+    font-size: 2rem;
+    font-weight: bold;
+    padding-left: 10px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+  }
+  
+  /* Tiêu đề */
+  h2 {
+    margin: 20px 0;
+    font-size: 1.2rem;
+    color: #333;
+    font-style: italic;
+    font-weight: bold;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
+  }
+  
+  /* Văn bản phụ */
+  .text {
+    font-size: 15px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
+    font-style: italic;
+    font-weight: bolder;
+    margin-top: 10px;
+  }
+  
+  /* Form đăng nhập */
+  .form {
+    width: 100%;
+    max-width: 400px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
+  }
+  
+  /* Trường nhập liệu */
+  .input-field {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  
+  .input-field:focus {
+    border-color: #34a853;
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 168, 83, 0.5); /* Hiệu ứng khi focus */
+  }
+  
+  /* Nút đăng nhập */
+  .btn-login {
+    background-color: #4698F4;
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: block;
+    margin: 20px auto;
+    text-align: center;
+  }
+  
+  .btn-login:hover {
+    background-color: #12d389;
+    transform: scale(1.05); /* Phóng to nhẹ khi hover */
+  }
+  
+  /* Đăng nhập với mạng xã hội */
+  .social-login {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .btn-facebook,
+  .btn-google {
+    margin: 10px 5px;
+    padding: 10px 20px;
+    border-radius: 28px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .btn-facebook {
+    background-color: #cdd4fa; /* Màu Facebook */
+    color: blue;
+    border: 1px solid rgb(92, 92, 233);
+  }
+  
+  .btn-facebook:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px rgba(59, 89, 152, 0.3);
+  }
+  
+  .btn-google {
+    background-color: #FAD6D6; /* Màu Google */
+    color: #F51111;
+    border: 1px solid rgb(238, 109, 109);
+    width: 120px;
+  }
+  
+  .btn-google:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px rgba(219, 68, 55, 0.3);
+  }
+  
+  /* Văn bản footer */
+  .footer-text {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #555;
+    text-align: center;
+  }
+  
+  .footer-text a {
+    color: rgb(231, 17, 17);
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .footer-text a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Thông báo lỗi */
+  .error-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  
+  .modal {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+  }
+  
+  .modal-buttons {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .btn-cancel, .btn-submit {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .btn-cancel {
+    background-color: #ccc;
+  }
+  
+  .btn-submit {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .link-button {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.9rem;
+  }
+  

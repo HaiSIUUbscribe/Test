@@ -1,0 +1,150 @@
+.icon{
+    font-size: 22px;
+    margin-bottom: 5px;
+}
+.music{
+    color: #FF405E;
+}
+.film{
+    color:#FF8940;
+}
+.sport{
+    color:#FFBE0C;
+}
+.travel{
+    color:#41DB6F;
+}
+.other{
+    color:#C21E47;
+}
+.top_icon{
+    color: #FF9A0C;
+    padding-top: 15px;
+    padding-right: 20px;
+}
+.search_bar{
+    border: 1px solid #FF9A0C;
+    width: 250px;
+    height: 40px;
+}
+/* Slider container */
+.slider-container {
+    position: relative;
+    width: 95%;
+    max-width: 800px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 10px;
+    bottom: 35px;
+  }
+  
+  /* Slider */
+  .slider {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+  }
+  
+  /* Slide */
+  .slide {
+    min-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .slide img {
+    width: 100%;
+    display: block;
+    border-radius: 10px;
+  }
+  
+  /* Slider controls */
+  .slider-controls {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+  }
+  
+  .slider-controls button {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 18px;
+  }
+  
+  .slider-controls button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  .no-scrollbar {
+    overflow-x: auto; /* Cho phép cuộn ngang */
+    -ms-overflow-style: none; /* Ẩn thanh cuộn trên IE và Edge */
+    scrollbar-width: none; /* Ẩn thanh cuộn trên Firefox */
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Ẩn thanh cuộn trên Chrome, Safari và Edge */
+  }
+  .place {
+   position: relative;
+   bottom: 30px;
+  }
+ 
+  .body {
+    overflow-y: auto; /* Đảm bảo cuộn dọc được bật */
+    position: relative;
+    bottom: 90px;
+    width: 100%;
+  }
+  .page-scrollable {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .page-body-scrollable {
+    flex: 1;
+    overflow-y: auto; /* Bật cuộn dọc */
+    padding-bottom: 80px; /* Chừa chỗ cho footer */
+    padding-top: 160px; /* Chừa chỗ cho header */
+  }
+/* Thanh điều hướng dưới */
+.navigation {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: white;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+    z-index: 10;
+  }
+  
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #555; /* Màu mặc định */
+    transition: color 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .nav-item .icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-item.active {
+    color: red; /* Màu đỏ khi được chọn */
+  }
+  
+  .nav-item.active .icon {
+    color: red; /* Màu đỏ cho icon khi được chọn */
+  }

@@ -1,0 +1,13 @@
+
+  .page-scrollable {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #danhmuc {
+    flex: 1;
+    overflow-y: auto; /* Bật cuộn dọc */
+    padding-bottom: 20px; /* Chừa chỗ cho footer */
+    padding-top: 100px; /* Chừa chỗ cho header */
+  }
