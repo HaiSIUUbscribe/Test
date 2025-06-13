@@ -120,60 +120,67 @@ function Chuyenkhoan() {
   return (
     <Page className="relative min-h-screen bg-[#F4F5F6]">
       <Box className="mt-[56px] px-4 pb-32">
-        <Box className="bg-white rounded-xl p-4 mb-4">
-          <Text className="font-semibold text-lg mb-2">Thông tin đơn hàng</Text>
-          <Text className="text-gray-600 my-2">Họ và tên: {`${contactInfo?.ho || ""} ${contactInfo?.ten || ""}`}</Text>
-          <Text className="text-gray-600 my-2">Email: {contactInfo?.email || "Không có email"}</Text>
-          <Text className="text-gray-600 my-2">Nhà cung cấp: GDOUBLEH</Text>
-          <Text className="text-gray-600 my-2">Mã đơn hàng: {orderId}</Text>
-          <Text className="text-gray-600 my-2">Thời gian: {orderTime}</Text>
-          <Text className="text-gray-600 my-2">Nội dung: GDOUBLEH_Thanh toan don hang</Text>
-          <Text className="text-gray-600">Số tiền: {totalAmount || 0} đ</Text>
+        <Box className="bg-white rounded-xl p-4 mb-4 flex flex-col lg:flex-row gap-6 shadow-md">
+          {/* Cột thông tin đơn hàng */}
+          <Box className="w-full lg:w-1/2 border border-gray-200 rounded-lg p-4 shadow-sm">
+            <Text className="font-semibold text-xl mb-4 border-b pb-2">Thông tin đơn hàng</Text>
+            <Box className="text-gray-700 space-y-2">
+              <Text>🏷️ Nhà cung cấp: <strong>GDOUBLEH</strong></Text>
+              <Text>🧾 Mã đơn hàng: <strong>{orderId}</strong></Text>
+              <Text>🕒 Thời gian: <strong>{orderTime}</strong></Text>
+              <Text>📝 Nội dung: <strong>GDOUBLEH_Thanh toan don hang</strong></Text>
+              <Text>💰 Số tiền: <strong className="text-green-600">{totalAmount || 0} đ</strong></Text>
+            </Box>
+          </Box>
+
+          {/* Cột QR code */}
+          <Box className="w-full lg:w-1/2 flex flex-col items-center justify-center">
+            <Text className="font-semibold text-xl mb-4 border-b pb-2 text-[#EF0228]">Quét mã QR để thanh toán</Text>
+            <QRCodeSVG
+              value={`payment-confirmation?email=${contactInfo?.email}`}
+              size={200}
+              bgColor="#ffffff"
+              fgColor="#000000"
+              level="Q"
+              includeMargin={true}
+            />
+            <Text className="mt-4 text-red-500 font-semibold">
+              Mã QR hết hạn sau: {formatTime(countdown)}
+            </Text>
+          </Box>
         </Box>
 
-        <Box className="flex justify-center items-center my-6 flex-col">
-          <QRCodeSVG
-            value={`payment-confirmation?email=${contactInfo?.email}`}
-            size={200}
-            bgColor="#ffffff"
-            fgColor="#000000"
-            level="Q"
-            includeMargin={true}
-          />
-          <Text className="mt-4 text-red-500 font-semibold">
-            Mã QR hết hạn sau: {formatTime(countdown)}
-          </Text>
-        </Box>
-
+        {/* Các nút bên dưới */}
         {!isQRCodeScanned && (
-          <Box className="flex justify-center items-center my-6">
+          <Box className="flex flex-col lg:flex-row justify-between items-center gap-4 mt-6">
             <button
-              className="w-full bg-green-500 text-white text-lg font-semibold mt-4 rounded-full py-3"
+              className="w-full bg-green-500 text-white text-lg font-semibold rounded-full py-3"
               onClick={() => setIsQRCodeScanned(true)}
             >
-              Nhấn để quét
+              Nhấn để quét mã QR
             </button>
-            <button
-              className="w-full bg-red-500 text-white text-lg font-semibold mt-4 rounded-full py-3"
-              onClick={() =>setShowCancelDialog(true)}
+            <a
+              className="text-[#FD0003] text-lg font-semibold cursor-pointer py-3"
+              onClick={() => setShowCancelDialog(true)}
             >
-              Hủy Đơn Hàng
-            </button>
+              Hủy đơn hàng
+            </a>
           </Box>
         )}
 
         {isQRCodeScanned && (
           <>
-          <Text className="text-center text-green-600 font-medium mt-4">
-            Đã quét mã QR thành công! Đang chuyển hướng về trang chủ...
-          </Text>
-          {redirectCountdown !== null && (
-            <Text className="text-center text-gray-500 text-sm mt-2">
-              Chuyển hướng sau {redirectCountdown} giây...
+            <Text className="text-center text-green-600 font-medium mt-4">
+              🎉 Đã quét mã QR thành công! Đang chuyển hướng về trang chủ...
             </Text>
-          )}
+            {redirectCountdown !== null && (
+              <Text className="text-center text-gray-500 text-sm mt-2">
+                ⏳ Chuyển hướng sau {redirectCountdown} giây...
+              </Text>
+            )}
           </>
         )}
+
         {/* Dialog hủy đơn hàng */}
         {showCancelDialog && (
           <Box className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -191,9 +198,9 @@ function Chuyenkhoan() {
                 <Button
                   className="bg-red-500 text-white px-4 py-2 rounded"
                   onClick={() => {
-                    saveOrderToHistory("Đã hủy"); // Lưu trạng thái "Đã hủy"
+                    saveOrderToHistory("Đã hủy");
                     setShowCancelDialog(false);
-                    navigate("/"); // Quay về trang chủ
+                    navigate("/home");
                   }}
                 >
                   Có

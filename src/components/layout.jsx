@@ -22,6 +22,7 @@ import OrderOptions from "../pages/tuychon";
 import ThongTin from "../User/thongtin";
 import ChangePassword from "../User/changeMk";
 import ThanhTuu from "../User/thanhtuu";
+import Admin from "../Admin/Admin";
 
 const Layout = () => {
   return (
@@ -43,6 +44,7 @@ const Layout = () => {
           <Route path="/thongtin" element={<ThongTin />} />
           <Route path="/changeMk" element={<ChangePassword />} />
           <Route path="/thanhtuu" element={<ThanhTuu />} />
+          <Route path="/admin" element={<Admin />} />
           </AnimationRoutes>
         </ZMPRouter>
       </SnackbarProvider>

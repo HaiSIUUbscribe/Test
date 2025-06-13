@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Page, Input, Select, Button, Text } from "zmp-ui";
+import { Box, Page, Input, Button, Text } from "zmp-ui";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -10,6 +10,7 @@ function ThongTin() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [gender, setGender] = useState("");
+  const [isEditing, setIsEditing] = useState(false); // Trạng thái chỉnh sửa
 
   // Load dữ liệu từ localStorage nếu có
   useEffect(() => {
@@ -27,6 +28,7 @@ function ThongTin() {
     localStorage.setItem("address", address);
     localStorage.setItem("gender", gender);
     alert("Thông tin đã được lưu!");
+    setIsEditing(false); // Tắt chế độ chỉnh sửa sau khi lưu
   };
 
   return (
@@ -50,6 +52,7 @@ function ThongTin() {
           label="Họ và tên"
           value={fullname}
           onChange={(e) => setFullname(e.target.value)}
+          disabled={!isEditing} // Chỉ cho phép chỉnh sửa khi isEditing = true
         />
 
         <Input
@@ -57,37 +60,82 @@ function ThongTin() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={!isEditing} // Chỉ cho phép chỉnh sửa khi isEditing = true
         />
 
         <Input
           label="Số điện thoại"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
+          disabled={!isEditing} // Chỉ cho phép chỉnh sửa khi isEditing = true
         />
 
         <Input
           label="Địa chỉ"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
+          disabled={!isEditing} // Chỉ cho phép chỉnh sửa khi isEditing = true
         />
 
-        <Select
-          label="Giới tính"
-          value={gender}
-          onChange={(value) => setGender(value)}
-        >
-          <option value="">-- Chọn giới tính --</option>
-          <option value="Nam">Nam</option>
-          <option value="Nữ">Nữ</option>
-          <option value="Khác">Khác</option>
-        </Select>
+        <Box className="mb-4">
+          <Text className="font-semibold mb-2">Giới tính</Text>
+          <Box className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="gender"
+                value="Nam"
+                checked={gender === "Nam"}
+                onChange={(e) => setGender(e.target.value)}
+                disabled={!isEditing} // Chỉ cho phép chỉnh sửa khi isEditing = true
+                className="mr-2"
+              />
+              Nam
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="gender"
+                value="Nữ"
+                checked={gender === "Nữ"}
+                onChange={(e) => setGender(e.target.value)}
+                disabled={!isEditing} // Chỉ cho phép chỉnh sửa khi isEditing = true
+                className="mr-2"
+              />
+              Nữ
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="gender"
+                value="Khác"
+                checked={gender === "Khác"}
+                onChange={(e) => setGender(e.target.value)}
+                disabled={!isEditing} // Chỉ cho phép chỉnh sửa khi isEditing = true
+                className="mr-2"
+              />
+              Khác
+            </label>
+          </Box>
+        </Box>
 
-        <Button
-          className="bg-[#FC692A] text-white rounded-full py-2 font-semibold hover:bg-blue-700"
-          onClick={handleSave}
-        >
-          Lưu thông tin
-        </Button>
+        <Box className="flex gap-4">
+          {isEditing ? (
+            <Button
+              className="bg-[#FC692A] text-white rounded-full py-2 font-semibold hover:bg-blue-700"
+              onClick={handleSave}
+            >
+              Lưu thông tin
+            </Button>
+          ) : (
+            <Button
+              className="bg-[#FC692A] text-white rounded-full py-2 font-semibold hover:bg-blue-700"
+              onClick={() => setIsEditing(true)} // Bật chế độ chỉnh sửa
+            >
+              Chỉnh sửa
+            </Button>
+          )}
+        </Box>
       </Box>
     </Page>
   );

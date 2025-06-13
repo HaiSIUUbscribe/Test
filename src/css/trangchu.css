@@ -2,6 +2,11 @@
     font-size: 22px;
     margin-bottom: 5px;
 }
+.event-list1{
+    margin-bottom: 50px;
+    position: relative;
+    bottom:30px;
+}
 .music{
     color: #FF405E;
 }

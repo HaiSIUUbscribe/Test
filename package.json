@@ -17,13 +17,18 @@
   "scripts": {
     "login": "zmp login",
     "start": "zmp start",
-    "deploy": "zmp deploy"
+    "deploy": "zmp deploy",
+    "zalopay": "nodemon zalopay/sever.js"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@fortawesome/fontawesome-free": "^6.7.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "firebase": "^11.7.3",
     "jotai": "^2.12.1",
+    "mysql2": "^3.14.1",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -36,6 +41,7 @@
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.19",
     "cross-env": "^7.0.3",
+    "nodemon": "^3.1.10",
     "postcss": "^8.4.38",
     "postcss-cli": "^8.3.1",
     "postcss-preset-env": "^6.7.0",

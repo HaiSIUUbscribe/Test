@@ -1,4 +1,4 @@
-const events = [
+const special = [
     {
       id: "E1",
       img: "https://s1.media.ngoisao.vn/resize_580/news/2023/04/10/6d1718d056368a68d327-ngoisaovn-w2048-h1366.jpg",
@@ -14,7 +14,7 @@ const events = [
     },
     {
       id: "E2",
-      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIkQ7QjTFzGFF4DlOMpDu1iA-icyBvf38AMw&s",
+      img: "https://trixie.com.vn/media/images/event/51340926/z6555872239124_7282f22fcea782c42684dbada9efa3a9.jpg",
       name: "MiniShow Phương Linh",
       date: "21-04-2025",
       time: "21:00",
@@ -40,4 +40,4 @@ const events = [
     },
   ];
   
-  export default events;
+  export default special;

@@ -1,23 +1,37 @@
 import { useState } from "react";
 import { Box, Page, Text, Button, useNavigate } from "zmp-ui";
 import { useLocation } from "react-router-dom";
-import { Icon } from "zmp-ui";
+import { Icon , Input} from "zmp-ui";
+import { MdOutlinePayment } from "react-icons/md";
+import { IoChevronBackCircle } from "react-icons/io5";
 
 function Thanhtoan() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showBankLink, setShowBankLink] = useState(false); // Hiển thị cửa sổ liên kết ngân hàng
+  const [selectedBank, setSelectedBank] = useState(null); // Ngân hàng được chọn
+  const [cardNumber, setCardNumber] = useState(""); // Số thẻ
+  const [userName, setUserName] = useState(""); // Tên người dùng
+  const [savedUser, setSavedUser] = useState(null); // Thông tin người dùng đã lưu
+  const [canPay, setCanPay] = useState(false); // Cho phép thanh toán
 
-console.log("location.state:", location.state);
+ ///console.log("location.state:", location.state);
   // Lấy dữ liệu từ state
   const {
+    cartItems = [], // Dữ liệu từ `Cart.jsx`
+    totalAmount: cartTotalAmount = 0, // Tổng tiền từ `Cart.jsx`
     name,
     date,
     time,
     location: eventLocation,
-    ticketDetails = [],
-    seatDetails = [],
-    totalAmount,
+    ticketDetails = [], // Dữ liệu từ `Tuychon.jsx`
+    seatDetails = [], // Dữ liệu từ `Tuychon.jsx`
+    totalAmount: tuychonTotalAmount,
   } = location.state || {};
+
+  const isFromCart = cartItems.length > 0; // Nếu có dữ liệu từ `Cart.jsx`
+  const totalAmount = isFromCart ? cartTotalAmount : tuychonTotalAmount; // Tổng tiền
+
 
   // Tính tổng cộng nếu không có `totalAmount`
   const calculatedTotalAmount =
@@ -34,10 +48,10 @@ console.log("location.state:", location.state);
   const [showDetails, setShowDetails] = useState(false);
 
   // Nếu không có dữ liệu, quay lại trang trước
-  if (!location.state || !name || !date || !time || !eventLocation || !ticketDetails) {
+  if (!location.state || (!isFromCart && (!name || !date || !time || !eventLocation || !ticketDetails))) {
     return (
       <div className="p-4">
-        <h1 className="text-lg font-semibold text-center mb-4">Không có thông tin vé</h1>
+        <h1 className="text-lg font-semibold text-center mb-4">Không có thông tin thanh toán</h1>
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded"
           onClick={() => navigate(-1)}
@@ -69,111 +83,143 @@ console.log("location.state:", location.state);
   const [showVoucher, setShowVoucher] = useState(false);
   const [selectedDiscount, setSelectedDiscount] = useState(0); // Lưu phần trăm giảm giá
 
+  const banks = [
+    { id: 1, name: "VietComBank", img: "https://www.inlogo.vn/vnt_upload/File/Image/logo_VCB_828891.jpg" },
+    { id: 2, name: "BIDV", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2gAJj0_QOmJi9Jo_s0EFE9LCORfwFRLiSOg&s" },
+    { id: 3, name: "Agribank", img: "https://inkythuatso.com/uploads/images/2021/11/logo-agribank-inkythuatso-3-01-09-15-15-16.jpg" },
+    { id: 4, name: "MB Bank", img: "https://rubicmarketing.com/wp-content/uploads/2022/11/y-nghia-logo-mb-bank-2.jpg" },
+  ];
+  const handleBankSelect = (bank) => {
+    setSelectedBank(bank);
+    setCardNumber("");
+    setUserName("");
+    setCanPay(false);
+  };
+  const handleSaveUser = () => {
+    if (cardNumber.length === 9 && userName.trim() !== "") {
+      setSavedUser({ name: userName, cardNumber });
+      setShowBankLink(false);
+      setCanPay(true);
+    } else {
+      alert("Vui lòng nhập đầy đủ thông tin hợp lệ!");
+    }
+  };
+
+
   return (
     <Page className="relative min-h-screen bg-[#F4F5F6]">
       {/* Header */}
-      <Box className="fixed top-0 left-0 w-full bg-white z-10 px-4 py-3 flex items-center">
-        <Box
-          className="p-2 -ml-2 cursor-pointer"
-          onClick={() => navigate(-1)}
-        >
-          <Text className="text-lg font-semibold ml-2">Hoàn tất đặt hàng (2/2)</Text>
+      <Box className="fixed top-0 left-0 w-full bg-[#FF7E2D] z-10 px-4 py-3 flex items-center">
+        <Box className="p-2 -ml-2 cursor-pointer">
+          <IoChevronBackCircle
+            className="text-2xl text-white cursor-pointer absolute top-5 z-10"
+            onClick={() => navigate(-1)}
+          />
+          <Text className="text-lg font-bold ml-8 text-white">Hoàn tất đặt hàng (2/2)</Text>
         </Box>
       </Box>
 
        {/* Main Content */}
-       <Box
-        className="mt-[56px] px-4 overflow-y-auto"
-        style={{ maxHeight: "calc(100vh - 180px)" }}
-      >
-          <Box className="bg-white rounded-xl p-4 mb-4">
-            <Text className="font-semibold text-lg mb-2">Thông tin sự kiện</Text>
-            <Text className="text-gray-600">Sự kiện: {name}</Text>
-            <Text className="text-gray-600">Ngày: {date}</Text>
-            <Text className="text-gray-600">Thời gian: {time}</Text>
-            <Text className="text-gray-600">Địa điểm: {eventLocation}</Text>
-            <Button
-              className="bg-[#FF405E] text-white mt-2 p-0"
-              onClick={() => setShowDetails(true)}
-            >
-              Xem chi tiết
-            </Button>
-          </Box>
+       <Box className="mt-[65px] px-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 180px)" }}>
+        <Box className="bg-white rounded-xl p-4 mb-4">
+          <Text className="font-bold text-lg mb-2 text-[#F61619]">Thông tin sự kiện</Text>
 
-            {/* Overlay che nền khi popup mở */}
-            {showDetails && (
-              <Box className="fixed top-0 left-0 w-full h-full bg-black opacity-30 z-30" />
-            )}
+          {isFromCart ? (
+            cartItems.map((item, index) => (
+              <Box key={index} className="mb-4">
+                <Text className="text-gray-600">Sự kiện: {item.name}</Text>
+                <Text className="text-gray-600">Ngày: {item.date}</Text>
+                <Text className="text-gray-600">Thời gian: {item.time}</Text>
+                <Text className="text-gray-600">Địa điểm: {item.location}</Text>
 
-            {/* Chi tiết */}
-            <Box
-              className={`fixed bottom-0 left-0 w-full bg-white border-t px-4 py-3 z-40 transition-transform duration-300 ${
-                showDetails ? "translate-y-0" : "translate-y-full"
-              }`}
-              style={{ height: "70vh", overflowY: "auto" }}
-            >
-              <Box className="flex justify-between items-center mb-4">
-                <Text className="font-bold text-lg">CHI TIẾT</Text>
-                <Button
-                  className="text-white bg-[#FF405E]"
-                  onClick={() => setShowDetails(false)}
+                {showDetails && (
+                  <>
+                    <Text className="text-gray-600">Loại vé: {item.type}</Text>
+                    <Text className="text-gray-600">Số lượng: {item.quantity}</Text>
+                    <Text className="text-gray-600">Tổng: {item.total.toLocaleString("vi-VN")} đ</Text>
+
+                    {item.seats && item.seats.length > 0 && (
+                      <Box className="mt-2">
+                        <Text className="text-sm font-medium text-gray-700">Danh sách ghế:</Text>
+                        {item.seats.map((seat, seatIndex) => (
+                          <Text key={seatIndex} className="text-sm text-gray-500">
+                            - Ghế: {seat.seatId}, Loại: {seat.seatType}, Giá:{" "}
+                            {seat.seatPrice.toLocaleString("vi-VN")} đ
+                          </Text>
+                        ))}
+                      </Box>
+                    )}
+                  </>
+                )}
+
+                <button
+                  className="mt-2 text-[#F62C4E] underline"
+                  onClick={() => setShowDetails((prev) => !prev)}
                 >
-                  Đóng
-                </Button>
+                  {showDetails ? "Ẩn bớt" : "Xem chi tiết"}
+                </button>
               </Box>
+            ))
+          ) : (
+            <>
+              <Text className="text-gray-600">Sự kiện: {name}</Text>
+              <Text className="text-gray-600">Ngày: {date}</Text>
+              <Text className="text-gray-600">Thời gian: {time}</Text>
+              <Text className="text-gray-600">Địa điểm: {eventLocation}</Text>
 
-              <Box className="mb-4">
-                <Text className="font-semibold text-lg mb-2">Thông tin sự kiện</Text>
-                <Text className="text-gray-600">Sự kiện: {name}</Text>
-                <Text className="text-gray-600">Ngày: {date}</Text>
-                <Text className="text-gray-600">Thời gian: {time}</Text>
-                <Text className="text-gray-600">Địa điểm: {eventLocation}</Text>
-              </Box>
-
-              {/* Chi tiết vé */}
-              <Box className="mb-4">
-                <Text className="font-semibold text-lg mb-2">Chi tiết vé</Text>
-                {ticketDetails && ticketDetails.map((ticket, index) => (
-                  <Box key={index} className="mb-4">
-                    <Text className="text-gray-600">
-                      Loại vé: {ticket.type === "adultWeekday"
-                        ? "Người lớn - Trong tuần"
-                        : ticket.type === "childWeekday"
-                        ? "Trẻ em - Trong tuần"
-                        : ticket.type === "adultWeekend"
-                        ? "Người lớn - Cuối tuần"
-                        : "Trẻ em - Cuối tuần"}
-                    </Text>
-                    <Text className="text-gray-600">Số lượng: {ticket.quantity}</Text>
-                    <Text className="text-gray-600">
-                      Giá: {ticket.price.toLocaleString("vi-VN")} đ
-                    </Text>
-                    <Text className="text-gray-600">
-                      Tổng: {ticket.total.toLocaleString("vi-VN")} đ
-                    </Text>
-                  </Box>
-                ))}
-              </Box>
-
-              {/* Chi tiết ghế */}
-              {seatDetails && seatDetails.length > 0 && (
-                <Box>
-                  <Text className="font-semibold text-lg mb-2">Chi tiết ghế</Text>
-                  {seatDetails.map((seat, index) => (
-                    <Box key={index} className="mb-2">
-                      <Text className="text-gray-600">Ghế: {seat.seatId}</Text>
-                      <Text className="text-gray-600">Loại: {seat.seatType}</Text>
+              {showDetails && (
+                <>
+                  {ticketDetails.map((ticket, index) => (
+                    <Box key={index} className="mb-4">
                       <Text className="text-gray-600">
-                        Giá: {seat.seatPrice.toLocaleString("vi-VN")} đ
+                        Loại vé: {ticket.type === "adultWeekday"
+                          ? "Người lớn - Trong tuần"
+                          : ticket.type === "childWeekday"
+                          ? "Trẻ em - Trong tuần"
+                          : ticket.type === "adultWeekend"
+                          ? "Người lớn - Cuối tuần"
+                          : "Trẻ em - Cuối tuần"}
+                      </Text>
+                      <Text className="text-gray-600">Số lượng: {ticket.quantity}</Text>
+                      <Text className="text-gray-600">
+                        Giá: {ticket.price.toLocaleString("vi-VN")} đ
+                      </Text>
+                      <Text className="text-gray-600">
+                        Tổng: {ticket.total.toLocaleString("vi-VN")} đ
                       </Text>
                     </Box>
                   ))}
-                </Box>
-              )}
-            </Box>
-      </Box>
-      
 
+                  {seatDetails && seatDetails.length > 0 && (
+                    <Box>
+                      <Text className="font-semibold text-lg mb-2">Chi tiết ghế</Text>
+                      {seatDetails.map((seat, index) => (
+                        <Box key={index} className="mb-2">
+                          <Text className="text-gray-600">Ghế: {seat.seatId}</Text>
+                          <Text className="text-gray-600">Loại: {seat.seatType}</Text>
+                          <Text className="text-gray-600">
+                            Giá: {seat.seatPrice.toLocaleString("vi-VN")} đ
+                          </Text>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </>
+              )}
+
+              <button
+                className="mt-2 text-blue-600 underline"
+                onClick={() => setShowDetails((prev) => !prev)}
+              >
+                {showDetails ? "Ẩn bớt" : "Xem chi tiết"}
+              </button>
+            </>
+          )}
+        </Box>
+      </Box>
+
+      
+        <Box className="Body mb-[200px]">
       <Box className="bg-white rounded-xl px-4 mb-4">
           <Box className="flex justify-between items-start mb-2">
             <Box>
@@ -301,17 +347,17 @@ console.log("location.state:", location.state);
       </Box>
 
       <Box className="mb-6">
-        <Text className="font-semibold m-2">Giảm giá</Text>
+        <Text className="font-bold m-2">Giảm giá</Text>
         <Box className="flex items-center justify-between p-4 border rounded-lg mb-3 shadow-sm"
             onClick={() => setShowVoucher(true)}
         >
           <Box className="flex items-center">
             <Box className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-              <Icon icon="zi-ticket" className="text-blue-600 text-xl" />
+              <img src="https://t4.ftcdn.net/jpg/06/52/88/87/360_F_652888744_X9gN1zrSxYsghuOmtulmGvZT5IKYstli.jpg"/>
             </Box>
             <Text className="font-medium text-gray-800">GDOUBLEH Voucher</Text>
           </Box>
-          <Icon icon="zi-arrow-right" className="text-gray-400" />
+          <Icon icon="zi-arrow-right" className="text-[#FF0004]" />
         </Box>
       </Box>
 
@@ -371,11 +417,128 @@ console.log("location.state:", location.state);
         </Box>
       </Box>
 
+        {/* Phương thức thanh toán */}
+        <Box className="mb-2 pt-[5px]">
+        <Text className="font-bold m-4">Phương thức thanh toán</Text>
+        <Box className="flex items-center justify-between p-4 border rounded-lg mb-3 shadow-sm"
+            onClick={() => setShowBankLink(true)} // Hiển thị liên kết ngân hàng
+        >
+          <Box className="flex items-center">
+            <Box className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+              <MdOutlinePayment className="text-[#FF0004] text-xl" />
+            </Box>
+            <Text className="font-medium text-gray-800">GDOUBLEH PAY</Text>
+          </Box>
+          <Icon icon="zi-arrow-right" className="text-[#FF0004]" />
+        </Box>
+
+           {/* Cửa sổ liên kết ngân hàng */}
+      {showBankLink && (
+        <Box
+          className={`fixed bottom-0 left-0 w-full bg-white border-t px-4 py-3 z-40 transition-transform duration-300 ${
+            showBankLink ? "translate-y-0" : "translate-y-full"
+          }`}
+          style={{
+            height: "60vh",
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          <Box className="flex justify-between items-center mb-4">
+            <Text className="font-bold text-lg">Liên kết ngân hàng</Text>
+            <Button
+              className="text-white bg-[#FF405E]"
+              onClick={() => setShowBankLink(false)} // Đóng cửa sổ
+            >
+              Đóng
+            </Button>
+          </Box>
+
+          {/* Danh sách ngân hàng */}
+          <Box className="grid grid-cols-3 gap-3 mb-4">
+            {banks.map((bank) => (
+              <Box
+                key={bank.id}
+                className={`border p-3 rounded-md cursor-pointer ${
+                  selectedBank?.id === bank.id ? "border-[#FF405E]" : ""
+                }`}
+                onClick={() => handleBankSelect(bank)}
+              >
+                <img
+                  src={bank.img}
+                  alt={bank.name}
+                  className="w-full h-20 object-cover rounded-md mb-2"
+                />
+                <Text className="text-center">{bank.name}</Text>
+              </Box>
+            ))}
+          </Box>
+
+          {/* Nhập thông tin thẻ */}
+          {selectedBank && (
+            <Box>
+              <Text className="font-bold mb-2">Nhập thông tin thẻ</Text>
+              <Input
+                type="text"
+                placeholder="Số thẻ (9 số)"
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value)}
+                maxLength={9}
+                className="mb-3"
+              />
+              <Input
+                type="text"
+                placeholder="Tên chủ thẻ"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="mb-3"
+              />
+              <Button
+                className="text-white bg-[#FF405E] w-full"
+                onClick={handleSaveUser}
+              >
+                Lưu thông tin
+              </Button>
+            </Box>
+          )}
+        </Box>
+      )}
+
+        <Box className="flex items-center justify-between p-4 border rounded-lg mb-3 shadow-sm"
+            onClick={() => setShowVoucher(true)}
+        >
+          <Box className="flex items-center">
+            <Box className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+              <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Circle.png" alt="momo"/>
+            </Box>
+            <Text className="font-medium text-gray-800">VÍ MOMO</Text>
+          </Box>
+          <Icon icon="zi-arrow-right" className="text-[#FF0004]" />
+        </Box>
+
+      </Box> 
+        {/* Hiển thị thông tin người dùng đã lưu */}
+          {savedUser && (
+            <Box className="mt-8">
+              <Text className="font-bold pl-5 pb-3">Tài khoản đã liên kết:</Text>
+              <Box className="flex items-center justify-between mt-2">
+                <Text className="ml-4 font-bold border border-[#FF3C00] text-[#FF3C00] rounded-md p-4">+ {savedUser.name}</Text>
+                <button
+                  className="text-white bg-[#FF3C00] text-md px-4 py-1 mb-3 mr-3 rounded-md"
+                  onClick={() => setSavedUser(null)} // Xóa thông tin đã lưu
+                >
+                  Xóa
+                </button>
+              </Box>
+            </Box>
+          )}
+      </Box> 
+
       {/* Footer */}
       <Box className="fixed bottom-0 left-0 w-full bg-white border-t px-4 py-3">
         {/* Tổng cộng */}
         <Box className="flex items-center justify-between mb-3">
-          <Text className="text-lg font-semibold">Tổng cộng:</Text>
+          <Text className="text-lg font-bold text-[#FF6200]">Tổng cộng:</Text>
           <Text className="text-orange-600 text-xl font-bold">
             {((calculatedTotalAmount * (100 - selectedDiscount)) / 100).toLocaleString(
               "vi-VN"
@@ -386,21 +549,24 @@ console.log("location.state:", location.state);
 
         {/* Nút Thanh Toán */}
         <Button
-          className="w-full bg-[#FF6B35] text-white text-lg font-semibold"
-          onClick={() =>
-            navigate("/chuyenkhoan", {
-              state: {
-                contactInfo,
-                ticketDetails,
-                seatDetails,
-                totalAmount: calculatedTotalAmount, // Truyền tổng cộng sang trang tiếp theo
-                eventName: name,
-              },
-            })
-          }
-          disabled={!isContactInfoValid()}
-        >
-          Thanh Toán
+            className={`w-full text-white text-lg font-bold ${
+              canPay ? "bg-[#FF6B35]" : "bg-gray-400 cursor-not-allowed"
+            }`}
+            onClick={() =>
+              navigate("/chuyenkhoan", {
+                state: {
+                  contactInfo,
+                  ticketDetails,
+                  seatDetails,
+                  totalAmount:
+                    (calculatedTotalAmount * (100 - selectedDiscount)) / 100, // Truyền tổng cộng sang trang tiếp theo
+                  eventName: name,
+                },
+              })
+            }
+            disabled={!isContactInfoValid() || !canPay} // Thêm điều kiện kiểm tra canPay
+          >
+            Thanh Toán
         </Button>
       </Box>
     </Page>

@@ -1,13 +1,73 @@
+/* Cấu trúc trang */
+.page-scrollable {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-  .page-scrollable {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+#danhmuc {
+  flex: 1;
+  overflow-y: auto; /* Bật cuộn dọc */
+  padding-bottom: 20px; /* Chừa chỗ cho footer */
+  padding-top: 100px; /* Chừa chỗ cho header */
+}
+.music, .film, .sport, .travel, .other{
+  margin-left:10px;
+}
+.event-list{
+  margin-bottom: 80px;
+}
+/* Thanh menu scroll ngang */
+.menu-scroll {
+  margin-top: 20px;
+}
+
+.menu-container {
+  display: flex;
+  overflow-x: auto; /* Cho phép cuộn ngang */
+  scrollbar-width: none; /* Ẩn scrollbar trên Firefox */
+}
+
+.menu-container::-webkit-scrollbar {
+  display: none; /* Ẩn scrollbar trên Chrome, Safari và Edge */
+}
+
+.menu-item {
+  flex: 0 0 auto;
+  min-width: 100px; /* Đặt chiều rộng tối thiểu cho mỗi mục */
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
   
-  #danhmuc {
-    flex: 1;
-    overflow-y: auto; /* Bật cuộn dọc */
-    padding-bottom: 20px; /* Chừa chỗ cho footer */
-    padding-top: 100px; /* Chừa chỗ cho header */
+  transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.menu-item:hover {
+  transform: scale(1.05); /* Hiệu ứng phóng to khi hover */
+  background-color: #f0f0f0; /* Thay đổi màu nền khi hover */
+}
+
+.menu-item.active {
+  background-color: #F0F0F0; /* Màu xanh khi được chọn */
+  color: #F61619; /* Đổi màu chữ */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Thêm bóng đổ */
+}
+.event-item {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-item:hover {
+  transform: scale(1.05); /* Hiệu ứng phóng to khi hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Thêm bóng khi hover */
+}
+.grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Hiển thị 2 mục trên cùng một hàng */
+  gap: 10px; /* Khoảng cách giữa các mục */
+}
+
+@media (max-width: 768px) {
+  .menu-item {
+    min-width: 80px; /* Giảm chiều rộng tối thiểu trên thiết bị nhỏ */
   }
+}

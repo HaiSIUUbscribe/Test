@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { FaShoppingCart } from "react-icons/fa";
 import { IoChevronBackCircle } from "react-icons/io5";
 import { useNavigate, useParams } from "react-router-dom";
-import events from "../Data/events";
+import special from "../Data/special";
 import music from "../Data/music";
 import sport from "../Data/sport";
+import { getDoc, doc } from "firebase/firestore";
+import { db } from "../firebaseConfig"; // <-- thêm dòng này
+
 
 const initialStock = {
   adultWeekday: 50,
@@ -29,32 +32,55 @@ const OrderOptions = () => {
   const [eventData, setEventData] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
 
-  const seatMap = [
-  { id: "A1", type: "regular" },
-  { id: "A2", type: "regular"},
-  { id: "A3", type: "vip" },
-  { id: "A4", type: "vip" },
-  { id: "B1", type: "regular"},
-  { id: "B2", type: "regular"},
-  { id: "B3", type: "vip"},
-  { id: "B4", type: "vip"},
-];
+  const seatMap = Array.from({ length: 36 }, (_, i) => ({
+    id: `G${i + 1}`,
+    type: i < 18 ? 'vip' : 'regular',
+  }));
+  
+  const processEventData = (data) => {
+    return {
+      ...data,
+      date: data.date?.seconds ? new Date(data.date.seconds * 1000) : null, // Chuyển đổi Timestamp sang Date
+    };
+  };
 
   useEffect(() => {
-    const allData = [...events, ...music, ...sport];
-    const foundEvent = allData.find((item) => item.id === id);
-    if (!foundEvent) {
-      setEventData(null);
-      return;
-    }
-    setEventData(foundEvent);
-  }, [id]);
+    const fetchEventData = async () => {
+      try {
+        // Thử lấy từ Firebase
+        const docRef = doc(db, "events", id);
+        const docSnap = await getDoc(docRef);
+  
+        if (docSnap.exists()) {
+          setEventData({ id: docSnap.id, ...docSnap.data() });
+          return;
+        }
+  
+        // Nếu không có trong Firebase, lấy từ local
+        const allData = [...special, ...music, ...sport];
+        const foundEvent = allData.find((item) => item.id === id);
+  
+        if (foundEvent) {
+          setEventData(foundEvent);
+        } else {
+          console.error("Không tìm thấy sự kiện.");
+          setEventData(null);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu từ Firebase:", error);
+        setEventData(null);
+      }
+    };
+  
+    fetchEventData();
+  }, [id]);  
 
   useEffect(() => {
     const checkCart = () => {
       try {
         const storedCart = JSON.parse(sessionStorage.getItem('cart')) || [];
-        setShowBadge(storedCart.length > 0); // Hiển thị badge nếu giỏ hàng không trống
+        const totalQuantity = storedCart.reduce((sum, item) => sum + item.quantity, 0);
+        setShowBadge(totalQuantity > 0);
       } catch (error) {
         console.error('Lỗi khi kiểm tra giỏ hàng:', error);
         setShowBadge(false);
@@ -66,20 +92,12 @@ const OrderOptions = () => {
 
   const handleDateChange = (e) => {
     const selected = e.target.value;
-    const today = new Date();
     const selectedDateObj = new Date(selected);
-    today.setHours(0, 0, 0, 0);
     selectedDateObj.setHours(0, 0, 0, 0);
-
-    if (selectedDateObj < today) {
-      alert('Không được chọn ngày trong quá khứ!');
-      return;
-    }
-
     setSelectedDate(selected);
     const day = selectedDateObj.getDay();
     setIsWeekend(day === 0 || day === 6);
-  };
+  };  
 
   const handleIncrement = (type) => {
     if (!selectedDate || guestCount[type] >= ticketRemaining[type]) return;
@@ -120,12 +138,15 @@ const OrderOptions = () => {
   const getTotal = () => {
     if (!eventData) return 0;
 
+    const basePrice = parseInt(eventData?.prices?.[0]?.price?.toString().replace(/,/g, '')) || 0;
+
     const ticketPrices = {
-      adultWeekday: parseInt(eventData.prices[0].price.replace(/,/g, '')),
-      childWeekday: parseInt(eventData.prices[0].price.replace(/,/g, '')) - 100000,
-      adultWeekend: parseInt(eventData.prices[0].price.replace(/,/g, '')) + 100000,
-      childWeekend: parseInt(eventData.prices[0].price.replace(/,/g, '')) + 50000,
+      adultWeekday: basePrice,
+      childWeekday: basePrice - 100000,
+      adultWeekend: basePrice + 100000,
+      childWeekend: basePrice + 50000,
     };
+
 
     const ticketTotal = Object.keys(guestCount).reduce(
       (sum, type) => sum + guestCount[type] * ticketPrices[type],
@@ -197,7 +218,8 @@ const OrderOptions = () => {
       });
   
       sessionStorage.setItem("cart", JSON.stringify(updatedCart));
-      setShowBadge(updatedCart.length > 0); // Cập nhật trạng thái badge
+      const totalQuantity = updatedCart.reduce((sum, item) => sum + item.quantity, 0);
+      setShowBadge(totalQuantity > 0);
       alert("Đã thêm vào giỏ hàng!");
   
       // Xóa danh sách ghế đã chọn sau khi thêm vào giỏ hàng
@@ -227,12 +249,14 @@ const OrderOptions = () => {
   }, 0);
 };
 
-  const ticketPrices = {
-    adultWeekday: parseInt(eventData.prices[0].price.replace(/,/g, '')),
-    childWeekday: parseInt(eventData.prices[0].price.replace(/,/g, '')) - 100000,
-    adultWeekend: parseInt(eventData.prices[0].price.replace(/,/g, '')) + 100000,
-    childWeekend: parseInt(eventData.prices[0].price.replace(/,/g, '')) + 50000,
-  };
+const basePrice = parseInt(eventData?.prices?.[0]?.price?.toString().replace(/,/g, '')) || 0;
+
+const ticketPrices = {
+  adultWeekday: basePrice,
+  childWeekday: basePrice - 100000,
+  adultWeekend: basePrice + 100000,
+  childWeekend: basePrice + 50000,
+};
 
   const ticketOptions = [
     { type: 'adultWeekday', label: 'Người lớn - Vé Trong Tuần' },
@@ -248,7 +272,7 @@ const OrderOptions = () => {
   
 
   return (
-    <div className="p-4 bg-white min-h-screen pb-24 relative">
+    <div className="p-4 mt-1 bg-white min-h-screen pb-24 relative">
       <IoChevronBackCircle
         className="text-2xl cursor-pointer absolute top-5 z-10"
         onClick={() => navigate(`/chitietsukien/${id}`)}
@@ -257,13 +281,16 @@ const OrderOptions = () => {
       <div className="absolute right-4 top-4 cursor-pointer" onClick={() => navigate("/cart")}>
         <FaShoppingCart className="text-2xl" />
         {showBadge && (
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            1
-          </span>
-        )}
+            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {
+                JSON.parse(sessionStorage.getItem("cart"))
+                  ?.reduce((sum, item) => sum + item.quantity, 0) || 0
+              }
+            </span>
+          )}
       </div>
 
-      <h1 className="text-lg font-semibold text-center mb-1">Tùy chọn đơn hàng</h1>
+      <h1 className="text-lg font-semibold text-center mb-1 text-[#FC692A]">Tùy chọn đơn hàng</h1>
 
       <div className="mb-4">
         <img
@@ -274,15 +301,18 @@ const OrderOptions = () => {
       </div>
 
       <h2 className="text-base font-medium text-gray-800 mb-2">{eventData.name}</h2>
-      <p className="text-sm text-gray-600">{eventData.date} - {eventData.time}</p>
+      <p className="text-sm text-gray-600">{eventData.date?.seconds
+    ? new Date(eventData.date.seconds * 1000).toLocaleDateString("vi-VN")
+    : eventData.date} - {eventData.time}</p>
 
       <div className="border rounded-xl p-4 mb-4">
-        <p className="text-sm font-medium mb-1">Vui lòng chọn ngày tham quan</p>
+        <p className="text-sm font-medium mb-1">Vui lòng chọn ngày tham dự</p>
         <input
           type="date"
           className="w-full border rounded p-2 text-sm"
           onChange={handleDateChange}
           value={selectedDate}
+          min={new Date().toISOString().split('T')[0]}
         />
       </div>
 
@@ -324,22 +354,34 @@ const OrderOptions = () => {
                 Số ghế đã chọn không khớp với số lượng vé. Vui lòng chọn đủ ghế.
               </p>
             )}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-6 gap-2 mt-3">
             {seatMap.map((seat) => (
-            <button
-              key={seat.id}
-              onClick={() => handleSeatSelect(seat.id)}
-              className={`w-12 h-12 rounded ${
-                selectedSeats.includes(seat.id)
-                  ? "bg-green-500 text-white"
-                  : seat.type === "vip"
-                  ? "bg-yellow-500"
-                  : "bg-gray-300"
-              }`}
-            >
-              {seat.id}
-            </button>
-          ))}
+              <button
+                key={seat.id}
+                onClick={() => handleSeatSelect(seat.id)}
+                className={`w-10 h-10 rounded font-medium ${
+                  selectedSeats.includes(seat.id)
+                    ? "bg-green-500 text-white"
+                    : seat.type === "vip"
+                    ? "bg-yellow-500"
+                    : "bg-gray-300"
+                }`}
+              >
+                {seat.id}
+              </button>
+            ))}
+          </div>
+
+        <div className="flex items-center gap-4 m-4 text-sm">
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 bg-gray-300 rounded"></div> Ghế thường
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 bg-yellow-500 rounded"></div> Ghế VIP
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 bg-green-500 rounded"></div> Ghế bạn chọn
+          </div>
         </div>
       </div>
 
