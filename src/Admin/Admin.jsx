@@ -26,6 +26,8 @@ const Admin = () => {
     });
     const [editEventId, setEditEventId] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showAllEvents, setShowAllEvents] = useState(false); // Trạng thái hiển thị toàn bộ sự kiện
+    const visibleEvents = showAllEvents ? events : events.slice(0, 2); // Hiển thị 2 sự kiện hoặc toàn bộ
 
     // Lấy danh sách sự kiện từ Firestore
     useEffect(() => {
@@ -54,6 +56,7 @@ const Admin = () => {
     const handleAddOrUpdateEvent = async () => {
         try {
             if (editEventId) {
+                // Cập nhật sự kiện
                 const eventRef = doc(db, "events", editEventId);
                 await updateDoc(eventRef, {
                     name: newEvent.name,
@@ -68,7 +71,17 @@ const Admin = () => {
                 setSuccessMessage("✅ Cập nhật sự kiện thành công!");
                 setEditEventId(null);
             } else {
+                // Kiểm tra xem id đã tồn tại chưa
                 const eventRef = doc(db, "events", newEvent.id);
+                const eventSnap = await getDoc(eventRef);
+    
+                if (eventSnap.exists()) {
+                    // Nếu id đã tồn tại, hiển thị thông báo lỗi
+                    setErrorMessage("❌ ID sự kiện đã tồn tại. Vui lòng chọn ID khác.");
+                    return;
+                }
+    
+                // Thêm sự kiện mới
                 await setDoc(eventRef, {
                     name: newEvent.name,
                     date: Timestamp.fromDate(new Date(newEvent.date)),
@@ -79,22 +92,24 @@ const Admin = () => {
                     img: newEvent.img,
                     prices: [{ price: newEvent.price, currency: "₫" }],
                 });
-                setSuccessMessage("✅ Thêm sự kiện thành công!");
+                setSuccessMessage("✅ Thêm sự kiện mới thành công!");
             }
-
+    
+            // Reset form sau khi thêm hoặc cập nhật
             setNewEvent({
                 id: "",
                 name: "",
                 date: "",
                 time: "",
-                vote: "",
+                vote: 0,
                 location: "",
                 description: "",
                 img: "",
                 price: "",
             });
         } catch (error) {
-            console.error("Lỗi khi thêm hoặc sửa sự kiện:", error);
+            console.error("Lỗi khi thêm hoặc cập nhật sự kiện:", error);
+            setErrorMessage("❌ Đã xảy ra lỗi. Vui lòng thử lại.");
         }
     };
 
@@ -212,7 +227,7 @@ const Admin = () => {
 
             <div className="event-list">
                 <h3>Danh sách sự kiện</h3>
-                {events.map((event) => (
+                {visibleEvents.map((event) => (
                     <div key={event.id} className="event-item">
                         <h4>{event.name}</h4>
                         <p>
@@ -226,10 +241,22 @@ const Admin = () => {
                         <p>Thời gian: {event.time}</p>
                         <p>Địa điểm: {event.location}</p>
                         <p>Mô tả: {event.description}</p>
-                        <button onClick={() => handleEditEvent(event)}>Sửa</button>
+                        <button className="mr-10" onClick={() => handleEditEvent(event)}>
+                            Sửa
+                        </button>
                         <button onClick={() => handleDeleteEvent(event.id)}>Xóa</button>
                     </div>
                 ))}
+
+                {/* Nút Xem chi tiết */}
+                {events.length > 2 && (
+                    <button
+                        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+                        onClick={() => setShowAllEvents(!showAllEvents)}
+                    >
+                        {showAllEvents ? "Ẩn bớt" : "Xem chi tiết"}
+                    </button>
+                )}
             </div>
         </div>
     );

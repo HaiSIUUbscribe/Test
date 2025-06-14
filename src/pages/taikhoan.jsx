@@ -15,6 +15,7 @@ import {
 import React, { useState } from "react";
 import bg_bot from "../static/bg_bot.png";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../firebaseConfig";
 
 function Taikhoan() {
   const navigate = useNavigate();
@@ -33,11 +34,14 @@ function Taikhoan() {
     if (window.confirm("Bạn có chắc muốn đăng xuất?")) {
       // Xóa dữ liệu người dùng khỏi localStorage
       localStorage.clear();
-  
+      
+      console.log("Bắt đầu đăng xuất...");
       // Đăng xuất khỏi Firebase Authentication (nếu đang sử dụng Firebase)
       auth.signOut()
         .then(() => {
+
           alert("Đăng xuất thành công!");
+          console.log("Đăng xuất thành công!");
           navigate("/"); // Điều hướng về trang đăng nhập
         })
         .catch((error) => {

@@ -98,7 +98,7 @@ function Chuyenkhoan() {
     if (redirectCountdown === null) return;
   
     if (redirectCountdown === 0) {
-      navigate("/");
+      navigate("/home");
       return;
     }
   
