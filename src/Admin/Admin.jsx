@@ -7,29 +7,33 @@ import {
     onSnapshot,
     Timestamp,
     updateDoc,
+    getDoc,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import "../css/Admin.css";
 
 const Admin = () => {
     const [events, setEvents] = useState([]);
+    const [errorMessage, setErrorMessage] = useState(""); // ✅ Khai báo error
+    const [successMessage, setSuccessMessage] = useState("");
+    const [showAllEvents, setShowAllEvents] = useState(false);
+
     const [newEvent, setNewEvent] = useState({
         id: "",
         name: "",
         date: "",
         time: "",
-        vote: "",
+        vote: "", // ✅ Để là chuỗi cho khớp input
         location: "",
         description: "",
         img: "",
         price: "",
     });
-    const [editEventId, setEditEventId] = useState(null);
-    const [successMessage, setSuccessMessage] = useState("");
-    const [showAllEvents, setShowAllEvents] = useState(false); // Trạng thái hiển thị toàn bộ sự kiện
-    const visibleEvents = showAllEvents ? events : events.slice(0, 2); // Hiển thị 2 sự kiện hoặc toàn bộ
 
-    // Lấy danh sách sự kiện từ Firestore
+    const [editEventId, setEditEventId] = useState(null);
+
+    const visibleEvents = showAllEvents ? events : events.slice(0, 2);
+
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, "events"), (snapshot) => {
             const eventsData = snapshot.docs.map((doc) => ({
@@ -38,25 +42,22 @@ const Admin = () => {
             }));
             setEvents(eventsData);
         });
-
         return () => unsubscribe();
     }, []);
 
-    // Ẩn thông báo sau 3 giây
     useEffect(() => {
-        if (successMessage) {
+        if (successMessage || errorMessage) {
             const timer = setTimeout(() => {
                 setSuccessMessage("");
+                setErrorMessage("");
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [successMessage]);
+    }, [successMessage, errorMessage]);
 
-    // Thêm hoặc cập nhật sự kiện
     const handleAddOrUpdateEvent = async () => {
         try {
             if (editEventId) {
-                // Cập nhật sự kiện
                 const eventRef = doc(db, "events", editEventId);
                 await updateDoc(eventRef, {
                     name: newEvent.name,
@@ -71,17 +72,13 @@ const Admin = () => {
                 setSuccessMessage("✅ Cập nhật sự kiện thành công!");
                 setEditEventId(null);
             } else {
-                // Kiểm tra xem id đã tồn tại chưa
                 const eventRef = doc(db, "events", newEvent.id);
                 const eventSnap = await getDoc(eventRef);
-    
                 if (eventSnap.exists()) {
-                    // Nếu id đã tồn tại, hiển thị thông báo lỗi
                     setErrorMessage("❌ ID sự kiện đã tồn tại. Vui lòng chọn ID khác.");
                     return;
                 }
-    
-                // Thêm sự kiện mới
+
                 await setDoc(eventRef, {
                     name: newEvent.name,
                     date: Timestamp.fromDate(new Date(newEvent.date)),
@@ -94,14 +91,13 @@ const Admin = () => {
                 });
                 setSuccessMessage("✅ Thêm sự kiện mới thành công!");
             }
-    
-            // Reset form sau khi thêm hoặc cập nhật
+
             setNewEvent({
                 id: "",
                 name: "",
                 date: "",
                 time: "",
-                vote: 0,
+                vote: "",
                 location: "",
                 description: "",
                 img: "",
@@ -113,17 +109,16 @@ const Admin = () => {
         }
     };
 
-    // Xóa sự kiện
     const handleDeleteEvent = async (id) => {
         try {
             await deleteDoc(doc(db, "events", id));
             setSuccessMessage("🗑️ Xóa sự kiện thành công!");
         } catch (error) {
             console.error("Lỗi khi xóa sự kiện:", error);
+            setErrorMessage("❌ Xóa sự kiện thất bại.");
         }
     };
 
-    // Chỉnh sửa sự kiện
     const handleEditEvent = (event) => {
         setEditEventId(event.id);
         setNewEvent({
@@ -143,9 +138,8 @@ const Admin = () => {
         <div className="admin-container">
             <h2>Quản lý sự kiện</h2>
 
-            {successMessage && (
-                <div className="success-message">{successMessage}</div>
-            )}
+            {successMessage && <div className="success-message">{successMessage}</div>}
+            {errorMessage && <div className="error-message">{errorMessage}</div>}
 
             <div className="add-event-form">
                 <h3>{editEventId ? "Sửa sự kiện" : "Thêm sự kiện mới"}</h3>
@@ -233,9 +227,7 @@ const Admin = () => {
                         <p>
                             Ngày:{" "}
                             {event.date?.seconds
-                                ? new Date(event.date.seconds * 1000).toLocaleDateString(
-                                      "vi-VN"
-                                  )
+                                ? new Date(event.date.seconds * 1000).toLocaleDateString("vi-VN")
                                 : event.date}
                         </p>
                         <p>Thời gian: {event.time}</p>
@@ -248,7 +240,6 @@ const Admin = () => {
                     </div>
                 ))}
 
-                {/* Nút Xem chi tiết */}
                 {events.length > 2 && (
                     <button
                         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
